@@ -25,7 +25,8 @@ import {
 } from "@/components/ui/select";
 import { api } from "@/utils/axios";
 import { toast } from "sonner";
-
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 const formSchema = z.object({
   username: z.string().min(1, {
     message: "Username field cannot be empty",
@@ -38,6 +39,7 @@ const formSchema = z.object({
 
 export default function Register() {
   const [isRegister, setIsRegister] = React.useState(false);
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -56,10 +58,22 @@ export default function Register() {
       });
       if (response.status == 201) {
         toast("account have been created");
+        const result = await signIn("credentials", {
+          username: values.username,
+          password: values.password,
+          redirect: false,
+        });
+        if (result?.error) {
+          console.error(result.error);
+        } else {
+          toast("Login success");
+          router.push("/");
+        }
       }
     } catch (err) {
       console.log(err);
       toast(`Something went wrong, maybe your username is already registered`);
+    } finally {
       setIsRegister(false);
     }
   };
@@ -147,7 +161,10 @@ export default function Register() {
         </Form>
         <p className="font-normal text-[14px] text-sm text-slate-600">
           Already have an account?{" "}
-          <a href="" className="underline text-blue-600">
+          <a
+            href="http://localhost:3000/login"
+            className="underline text-blue-600"
+          >
             Login
           </a>
         </p>

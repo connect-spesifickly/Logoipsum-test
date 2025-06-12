@@ -5,6 +5,8 @@ import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import {
   Form,
   FormControl,
@@ -15,6 +17,7 @@ import {
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   username: z.string().min(1, {
@@ -26,6 +29,8 @@ const formSchema = z.object({
 });
 
 export default function Login() {
+  const [isLogin, setIsLogin] = React.useState(false);
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -34,8 +39,26 @@ export default function Login() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLogin(true);
+    try {
+      const result = await signIn("credentials", {
+        username: values.username,
+        password: values.password,
+        redirect: false,
+      });
+      if (result?.error) {
+        console.error(result.error);
+      } else {
+        toast("Login success");
+        router.push("/");
+      }
+    } catch (error) {
+      toast("Login Failed");
+      console.error(error);
+    } finally {
+      setIsLogin(false);
+    }
   }
 
   return (
@@ -83,7 +106,11 @@ export default function Login() {
                 )}
               />
             </div>
-            <Button type="submit" className=" w-full text-slate-50">
+            <Button
+              disabled={isLogin}
+              type="submit"
+              className=" w-full text-slate-50"
+            >
               Login
             </Button>
           </form>
@@ -91,7 +118,7 @@ export default function Login() {
         <p className="font-normal text-[14px] text-sm text-slate-600">
           Don`t have an account?{" "}
           <a
-            href="http://localhost:3001/register"
+            href="http://localhost:3000/register"
             className="underline text-blue-600"
           >
             Register

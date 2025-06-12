@@ -7,7 +7,7 @@ export function Logo2({ className }: React.ComponentProps<"input">) {
       <Image
         width={100}
         height={100}
-        className={`${className}`}
+        className={`${className} w-[134px] h-[24px]`}
         src="/Frame2.png"
         alt="Logo1"
       ></Image>
