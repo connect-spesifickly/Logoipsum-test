@@ -15,6 +15,16 @@ import {
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { api } from "@/utils/axios";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   username: z.string().min(1, {
@@ -23,9 +33,11 @@ const formSchema = z.object({
   password: z.string().min(8, {
     message: "Password must be at least 8 characters long",
   }),
+  role: z.enum(["User", "Admin"], { required_error: "Please select a role" }),
 });
 
-export default function Login() {
+export default function Register() {
+  const [isRegister, setIsRegister] = React.useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -34,9 +46,23 @@ export default function Login() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-  }
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setIsRegister(true);
+    try {
+      const response = await api.post("/auth/register", {
+        username: values.username,
+        password: values.password,
+        role: values.role,
+      });
+      if (response.status == 201) {
+        toast("account have been created");
+      }
+    } catch (err) {
+      console.log(err);
+      toast(`Something went wrong, maybe your username is already registered`);
+      setIsRegister(false);
+    }
+  };
 
   return (
     <div className="sm:bg-gray-100 bg-white w-full h-[100vh] flex justify-center items-center">
@@ -82,19 +108,47 @@ export default function Login() {
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-medium">Role</FormLabel>
+                    <FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="w-full font-normal text-sm text-[14px] text-gray-900">
+                          <SelectValue placeholder="Select Role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectItem value="User">User</SelectItem>
+                            <SelectItem value="Admin">Admin</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-            <Button type="submit" className=" w-full text-slate-50">
-              Login
+            <Button
+              type="submit"
+              className=" w-full text-slate-50"
+              disabled={isRegister}
+            >
+              Register
             </Button>
           </form>
         </Form>
         <p className="font-normal text-[14px] text-sm text-slate-600">
-          Don`t have an account?{" "}
-          <a
-            href="http://localhost:3001/register"
-            className="underline text-blue-600"
-          >
-            Register
+          Already have an account?{" "}
+          <a href="" className="underline text-blue-600">
+            Login
           </a>
         </p>
       </div>
