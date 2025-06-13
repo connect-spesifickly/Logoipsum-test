@@ -4,8 +4,25 @@ import { Navbar } from "@/components/ui/navbar/page";
 
 import Image from "next/image";
 import Searchbar from "./_components/searchbar";
+import { api } from "@/utils/axios";
+import React from "react";
+import { ArticlesResponse } from "@/lib/interfaces/articles-interfaces";
 
 export default function Home() {
+  // const [articles, setArticles] = React.useState();
+  React.useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const response = await api.get("/articles/");
+        const articlesData = response.data as ArticlesResponse;
+        console.log("Articles data:", articlesData);
+        // setArticles(articlesData.data)
+      } catch (error) {
+        console.error("Error fetching articles:", error);
+      }
+    };
+    fetchArticles();
+  }, []);
   return (
     <div className="h-[2000px]">
       <Navbar className="sm:hidden block" />
@@ -38,6 +55,7 @@ export default function Home() {
           </div>
         </div>
       </div>
+      <div className=""></div>
     </div>
   );
 }
