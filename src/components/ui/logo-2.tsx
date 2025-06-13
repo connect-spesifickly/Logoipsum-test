@@ -9,7 +9,7 @@ export function Logo2({ className }: React.ComponentProps<"input">) {
         height={100}
         className={`${className} w-[134px] h-[24px]`}
         src="/Frame2.png"
-        alt="Logo1"
+        alt="Logo2"
       ></Image>
     </div>
   );

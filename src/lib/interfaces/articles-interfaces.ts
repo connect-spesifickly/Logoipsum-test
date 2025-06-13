@@ -3,13 +3,20 @@ export interface IArticleCard {
   imageUrl: string;
   title: string;
   content: string;
-  createAt: string;
+  createdAt: string;
   category: { name: string };
 }
 
 export interface ArticlesResponse {
-  data: IArticleCard;
+  data: IArticleCard[];
   limit: number;
   page: number;
   total: number;
+}
+
+export interface Pagination {
+  currentPage: number;
+  totalPage: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
 }

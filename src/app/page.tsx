@@ -6,17 +6,23 @@ import Image from "next/image";
 import Searchbar from "./_components/searchbar";
 import { api } from "@/utils/axios";
 import React from "react";
-import { ArticlesResponse } from "@/lib/interfaces/articles-interfaces";
+import {
+  ArticlesResponse,
+  IArticleCard,
+} from "@/lib/interfaces/articles-interfaces";
+import ArticleCard from "@/components/ui/article-card/page";
+import ArticlesPagination from "./_components/articles-pagination";
+import { Footer } from "@/components/ui/footer/page";
 
 export default function Home() {
-  // const [articles, setArticles] = React.useState();
+  const [articles, setArticles] = React.useState<ArticlesResponse[]>();
   React.useEffect(() => {
     const fetchArticles = async () => {
       try {
         const response = await api.get("/articles/");
         const articlesData = response.data as ArticlesResponse;
         console.log("Articles data:", articlesData);
-        // setArticles(articlesData.data)
+        setArticles([articlesData]);
       } catch (error) {
         console.error("Error fetching articles:", error);
       }
@@ -24,7 +30,7 @@ export default function Home() {
     fetchArticles();
   }, []);
   return (
-    <div className="h-[2000px]">
+    <div className="h-fit">
       <Navbar className="sm:hidden block" />
       <Image
         width={100}
@@ -55,7 +61,51 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <div className=""></div>
+      <div className="w-full  pt-[40px] sm:pb-[100px] sm:px-[100px] px-[20px] pb-[60px] flex-col items-center justify-center flex">
+        <div className=" ">
+          {articles !== undefined ? (
+            <div className="flex flex-col gap-[24px]">
+              <div className="hidden sm:block text-base text-[16px] font-medium text-slate-600 w-full">
+                Showing :{" "}
+                {articles[0].limit <= articles[0].total
+                  ? articles[0].limit * (articles[0].page - 1) +
+                    (articles[0].total % articles[0].limit)
+                  : articles[0].total}{" "}
+                of {articles[0].total} articles
+              </div>
+              <div className="grid w-full grid-cols-1 sm:gap-y-[60px] gap-y-[40px] gap-x-[40px] md:grid-cols-2 lg:grid-cols-3 ">
+                {articles[0].data.map((article: IArticleCard) => (
+                  <ArticleCard
+                    key={article.id}
+                    id={article.id}
+                    imageUrl={article.imageUrl}
+                    title={article?.title}
+                    content={article?.content}
+                    createdAt={article?.createdAt}
+                    category={article?.category}
+                  />
+                ))}
+              </div>
+              {articles[0].total && (
+                <ArticlesPagination
+                  currentPage={articles[0].page}
+                  totalPage={Math.ceil(articles[0].total / articles[0].limit)}
+                  hasPreviousPage={articles[0].page > 1}
+                  hasNextPage={
+                    articles[0].page <
+                    Math.ceil(articles[0].total / articles[0].limit)
+                  }
+                />
+              )}
+            </div>
+          ) : (
+            <div className="py-40 text-center">
+              <p>No articles found</p>
+            </div>
+          )}
+        </div>
+      </div>
+      <Footer />
     </div>
   );
 }
