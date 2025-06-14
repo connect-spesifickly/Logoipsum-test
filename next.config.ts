@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "s3.sellerpintar.com",
       },
+      {
+        protocol: "https",
+        hostname: "your-s3-bucket.amazonaws.com",
+      },
     ],
   },
 };

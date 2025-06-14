@@ -20,3 +20,12 @@ export interface Pagination {
   hasPreviousPage: boolean;
   hasNextPage: boolean;
 }
+
+export interface ArticleDetail {
+  title: string;
+  createdAt: string;
+  user: { username: string };
+  imageUrl: string;
+  category: { id: string };
+  content: string;
+}

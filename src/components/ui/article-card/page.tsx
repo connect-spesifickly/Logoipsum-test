@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 // import { cn } from '@/lib/utils';
 
 import { IArticleCard } from "@/lib/interfaces/articles-interfaces";
+import dateFormat from "@/utils/date-format";
 
 // import { MdOutlineWork } from 'react-icons/md';
 
@@ -17,17 +18,6 @@ export default function ArticleCard({
   createdAt,
   category,
 }: IArticleCard) {
-  function dateFormat(isoString: string) {
-    const date = new Date(isoString);
-    return date
-      .toLocaleDateString("id-ID", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-      .replace(/(\d+) (\w+) (\d+)/, "$2 $1, $3");
-  }
-
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
@@ -35,16 +25,16 @@ export default function ArticleCard({
   const cleanContent = content?.replace(/<[^>]*>/g, "") || "";
 
   return (
-    <div className="relative group sm:max-w-[386.67px] max-w-[335px]">
-      <Link href={`/articles/${id}`} className="">
+    <div className="relative group sm:max-w-[386.67px] max-w-[345px]">
+      <Link href={`/article/${id}`} className="">
         <div className="flex flex-col gap-[16px]">
           <div className="w-full max-w-full">
             <Image
-              src={imageUrl || "/company-logo.png"}
-              alt="Company logo"
+              src={imageUrl || "/no-image.jpg"}
+              alt="Article Image"
               width={100}
               height={100}
-              className="rounded-[12px] sm:h-[240px] sm:w-[386.67px] h-[200px] w-[335px]  "
+              className="rounded-[12px] sm:h-[240px] sm:w-[386.67px] h-[200px] w-[345px]  "
             />
           </div>
           <div className="flex-col flex gap-[8px]">

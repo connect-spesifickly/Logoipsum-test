@@ -11,18 +11,24 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import { Pagination as PaginationType } from "@/lib/interfaces/articles-interfaces";
 
+interface ArticlesPaginationProps extends PaginationType {
+  onPageChange: (page: string) => void;
+}
+
 export default function ArticlesPagination({
   currentPage,
   totalPage,
   hasPreviousPage,
   hasNextPage,
-}: PaginationType) {
+  onPageChange,
+}: ArticlesPaginationProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", page.toString());
-    router.push(`/all-companies?${params.toString()}`);
+    router.push(`/?${params.toString()}`);
+    onPageChange(page.toString());
   };
 
   const generatePaginationItems = () => {

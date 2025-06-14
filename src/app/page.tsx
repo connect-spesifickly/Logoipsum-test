@@ -13,22 +13,62 @@ import {
 import ArticleCard from "@/components/ui/article-card/page";
 import ArticlesPagination from "./_components/articles-pagination";
 import { Footer } from "@/components/ui/footer/page";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function Home() {
   const [articles, setArticles] = React.useState<ArticlesResponse[]>();
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const currentPage = parseInt(searchParams.get("page") || "1");
+  const currentCategory = searchParams.get("category") || "";
+  const currentTitle = searchParams.get("title") || "";
+
   React.useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const response = await api.get("/articles/");
+        const response = await api.get("/articles", {
+          params: {
+            page: currentPage,
+            category: currentCategory !== "all" ? currentCategory : "",
+            title: currentTitle,
+            limit: 9,
+          },
+        });
+        console.log("ini response", response);
         const articlesData = response.data as ArticlesResponse;
-        console.log("Articles data:", articlesData);
+        console.log(articlesData);
         setArticles([articlesData]);
       } catch (error) {
         console.error("Error fetching articles:", error);
       }
     };
     fetchArticles();
-  }, []);
+  }, [currentCategory, currentPage, currentTitle]);
+
+  const updateSeacrchParams = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+
+    if (key !== "page") {
+      params.set("page", "1");
+    }
+
+    router.push(`?${params.toString()}`);
+  };
+
+  const handleSearch = (searchTerm: string) => {
+    updateSeacrchParams("title", searchTerm);
+  };
+
+  const handlePageChange = (page: string) => {
+    updateSeacrchParams("page", page.toString());
+  };
   return (
     <div className="h-fit">
       <Navbar className="sm:hidden block" />
@@ -56,7 +96,10 @@ export default function Home() {
               </p>
             </div>
             <div className="h-[10px]  w-full sm:max-w-[608px]">
-              <Searchbar></Searchbar>
+              <Searchbar
+                onSearch={handleSearch}
+                defaultValue={currentTitle}
+              ></Searchbar>
             </div>
           </div>
         </div>
@@ -68,8 +111,11 @@ export default function Home() {
               <div className="hidden sm:block text-base text-[16px] font-medium text-slate-600 w-full">
                 Showing :{" "}
                 {articles[0].limit <= articles[0].total
-                  ? articles[0].limit * (articles[0].page - 1) +
-                    (articles[0].total % articles[0].limit)
+                  ? articles[0].limit *
+                      (articles[0].page == 1 ? 1 : articles[0].page - 1) +
+                    (articles[0].page == 1
+                      ? 0
+                      : articles[0].total % articles[0].limit)
                   : articles[0].total}{" "}
                 of {articles[0].total} articles
               </div>
@@ -86,7 +132,7 @@ export default function Home() {
                   />
                 ))}
               </div>
-              {articles[0].total && (
+              {articles[0].total ? (
                 <ArticlesPagination
                   currentPage={articles[0].page}
                   totalPage={Math.ceil(articles[0].total / articles[0].limit)}
@@ -95,7 +141,10 @@ export default function Home() {
                     articles[0].page <
                     Math.ceil(articles[0].total / articles[0].limit)
                   }
+                  onPageChange={handlePageChange}
                 />
+              ) : (
+                <div className=""></div>
               )}
             </div>
           ) : (
