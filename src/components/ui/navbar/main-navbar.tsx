@@ -1,18 +1,20 @@
 "use client";
 import * as React from "react";
 import { Logo2 } from "../logo-2";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { api } from "@/utils/axios";
 import { Logo1 } from "../logo-1";
 
 import { LogOut } from "lucide-react";
 import Link from "next/link";
+import DialogLogout from "./_components/dialog";
 const Navbar = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & { location?: string }
 >(({ className, location }, ref) => {
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = React.useState(false);
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [username, setUsername] = React.useState("");
   React.useEffect(() => {
     const fetchProfile = async () => {
@@ -41,7 +43,19 @@ const Navbar = React.forwardRef<
       }`}
       ref={ref}
     >
-      {location == "homepage" ? <Logo2 /> : <Logo1 />}
+      {location == "homepage" ? (
+        <Logo2 />
+      ) : location == "articles-management" ? (
+        <div className="text-slate-900 text-[20px] font-semibold text-xl">
+          Articles
+        </div>
+      ) : location == "category-management" ? (
+        <div className="text-slate-900 text-[20px] font-semibold text-xl">
+          Category
+        </div>
+      ) : (
+        <Logo1 />
+      )}
       <div className="flex gap-[6px] items-center justify-center">
         <>
           {isOpen && (
@@ -70,17 +84,23 @@ const Navbar = React.forwardRef<
 
                 <div className="py-[6px] px-[8px] gap-[8px] font-medium text-red flex items-center hover:bg-transparent cursor-pointer">
                   <LogOut className="text-red-500 w-4 h-4" />
-                  <button
+                  <div
+                    className="text-red-500 text-left hover:bg-transparent w-full"
                     onClick={() => {
-                      signOut();
+                      setIsDialogOpen(true);
                       setIsOpen(false);
                     }}
-                    className="text-red-500 text-left hover:bg-transparent"
                   >
                     Log Out
-                  </button>
+                  </div>
                 </div>
               </div>
+            )}
+            {isDialogOpen && (
+              <DialogLogout
+                isDialogOpen={isDialogOpen}
+                setIsDialogOpen={setIsDialogOpen}
+              />
             )}
           </div>
         </>

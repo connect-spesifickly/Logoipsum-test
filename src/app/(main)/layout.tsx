@@ -1,5 +1,5 @@
 import { Footer } from "@/components/ui/footer/page";
-import { Navbar } from "@/components/ui/navbar/page";
+import { Navbar } from "@/components/ui/navbar/main-navbar";
 import { Toaster } from "@/components/ui/sonner";
 
 export default async function MainLayout({

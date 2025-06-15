@@ -1,18 +1,11 @@
 import * as React from "react";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { Search } from "lucide-react";
 import { api } from "@/utils/axios";
 import { useRouter, useSearchParams } from "next/navigation";
+import { CategoryDropdown } from "@/components/category-dropdown";
 
-interface Category {
+export interface Category {
   id: number;
   name: string;
 }
@@ -93,25 +86,11 @@ export default function Searchbar({
   return (
     <div className="bg-blue-500 rounded-[12px] w-full p-[10px] gap-[8px] flex sm:flex-row flex-col">
       <div className="sm:w-fit w-full h-[40px]">
-        <Select value={currentCategory} onValueChange={handleCategoryChange}>
-          <SelectTrigger className="min-h-[40px] sm:w-[180px] text-[14px] w-full bg-white rounded-md text-gray-900  outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-            <SelectValue placeholder="Select category" />
-          </SelectTrigger>
-          <SelectContent side="bottom" avoidCollisions={false} sideOffset={2}>
-            <SelectGroup>
-              <SelectLabel>Categories</SelectLabel>
-              <SelectItem value={"all"}>All</SelectItem>
-              {categories.map((category) => (
-                <SelectItem
-                  key={category.id}
-                  value={category.id.toString() || " "}
-                >
-                  {category.name}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+        <CategoryDropdown
+          currentCategory={currentCategory}
+          handleCategoryChange={handleCategoryChange}
+          categories={categories}
+        />
       </div>
       <div className=" w-full  rounded-[6px] ">
         <div
