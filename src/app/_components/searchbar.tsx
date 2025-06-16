@@ -2,7 +2,6 @@ import * as React from "react";
 
 import { Search } from "lucide-react";
 import { api } from "@/utils/axios";
-import { useRouter, useSearchParams } from "next/navigation";
 import { CategoryDropdown } from "@/components/category-dropdown";
 
 export interface Category {
@@ -18,14 +17,21 @@ export default function Searchbar({
 }) {
   const [categories, setCategories] = React.useState<Category[]>([]);
   const [searchInput, setSearchInput] = React.useState(defaultValue);
+  const [mounted, setMounted] = React.useState(false);
+  const [currentCategory, setCurrentCategory] = React.useState("");
 
-  const searchParams = useSearchParams();
-  const router = useRouter();
-
-  const currentCategory = searchParams.get("category") || "";
+  React.useEffect(() => {
+    setMounted(true);
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      setCurrentCategory(urlParams.get("category") || "");
+    }
+  }, []);
 
   const updateSearchParams = (key: string, value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
+    if (typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
     if (value) {
       params.set(key, value);
     } else {
@@ -33,7 +39,10 @@ export default function Searchbar({
     }
 
     params.set("page", "1");
-    router.push(`/?${params.toString()}`);
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.pushState({}, "", newUrl);
+
+    setCurrentCategory(params.get("category") || "");
   };
 
   const handleCategoryChange = (category: string) => {
@@ -83,6 +92,11 @@ export default function Searchbar({
     };
     fetchCategories();
   }, []);
+
+  if (!mounted) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="bg-blue-500 rounded-[12px] w-full p-[10px] gap-[8px] flex sm:flex-row flex-col">
       <div className="sm:w-fit w-full h-[40px]">

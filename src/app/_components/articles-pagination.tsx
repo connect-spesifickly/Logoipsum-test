@@ -8,7 +8,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { useRouter, useSearchParams } from "next/navigation";
 import { Pagination as PaginationType } from "@/lib/interfaces/articles-interfaces";
 
 interface ArticlesPaginationProps extends PaginationType {
@@ -22,12 +21,13 @@ export default function ArticlesPagination({
   hasNextPage,
   onPageChange,
 }: ArticlesPaginationProps) {
-  const searchParams = useSearchParams();
-  const router = useRouter();
   const handlePageChange = (page: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", page.toString());
-    router.push(`/?${params.toString()}`);
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      params.set("page", page.toString());
+      const newUrl = `${window.location.pathname}?${params.toString()}`;
+      window.history.pushState({}, "", newUrl);
+    }
     onPageChange(page.toString());
   };
 

@@ -1,10 +1,9 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
-
-import { cn } from '@/lib/utils';
-
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
 interface IItem {
   id: number;
   label: string;
@@ -33,9 +32,38 @@ const BottomNavigation = ({ items }: BottomNavigationProps) => {
 
 const NavigationItem = ({ item, className }: NavigationItemProps) => {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const [currentUrl, setCurrentUrl] = useState("");
+  const [mounted, setMounted] = useState(false);
 
-  const currentUrl = `${pathname}${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window !== "undefined") {
+      const searchParams = window.location.search;
+      setCurrentUrl(`${pathname}${searchParams}`);
+    }
+  }, [pathname]);
+  useEffect(() => {
+    if (!mounted) return;
+
+    const handlePopState = () => {
+      if (typeof window !== "undefined") {
+        const searchParams = window.location.search;
+        setCurrentUrl(`${pathname}${searchParams}`);
+      }
+    };
+    window.addEventListener(`popstate`, handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [pathname, mounted]);
+  if (!mounted) {
+    return (
+      <div className="text-primary-gray hover:bg-primary-gray-background flex h-full w-full cursor-pointer flex-col items-center justify-center bg-white transition-all duration-300 ease-in-out active:bg-white">
+        <div className="flex h-4 w-4 items-center justify-center">
+          {item.icon}
+        </div>
+        <span className="text-[10px]">{item.label}</span>
+      </div>
+    );
+  }
   const isActive = item.href === currentUrl;
 
   return (
@@ -43,11 +71,11 @@ const NavigationItem = ({ item, className }: NavigationItemProps) => {
       href={item.href}
       aria-label={`${item.label} page`}
       className={cn(
-        'text-primary-gray hover:bg-primary-gray-background flex h-full w-full cursor-pointer flex-col items-center justify-center bg-white transition-all duration-300 ease-in-out active:bg-white',
+        "text-primary-gray hover:bg-primary-gray-background flex h-full w-full cursor-pointer flex-col items-center justify-center bg-white transition-all duration-300 ease-in-out active:bg-white",
         {
-          'text-primary-blue border-primary-blue border-t': isActive,
+          "text-primary-blue border-primary-blue border-t": isActive,
         },
-        className,
+        className
       )}
     >
       <div className="flex h-4 w-4 items-center justify-center">
