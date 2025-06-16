@@ -13,19 +13,36 @@ import {
 import ArticleCard from "@/components/ui/article-card/page";
 import ArticlesPagination from "./_components/articles-pagination";
 import { Footer } from "@/components/ui/footer/page";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 function HomeContent() {
   const [articles, setArticles] = React.useState<ArticlesResponse[]>();
-
-  const searchParams = useSearchParams();
+  const [mounted, setMounted] = React.useState(false);
+  const [searchParams, setSearchParams] = React.useState({
+    page: "1",
+    category: "",
+    title: "",
+  });
   const router = useRouter();
 
-  const currentPage = parseInt(searchParams.get("page") || "1");
-  const currentCategory = searchParams.get("category") || "";
-  const currentTitle = searchParams.get("title") || "";
+  React.useEffect(() => {
+    setMounted(true);
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      setSearchParams({
+        page: urlParams.get("page") || "1",
+        category: urlParams.get("category") || "",
+        title: urlParams.get("title") || "",
+      });
+    }
+  }, []);
+
+  const currentPage = parseInt(searchParams.page);
+  const currentCategory = searchParams.category;
+  const currentTitle = searchParams.title;
 
   React.useEffect(() => {
+    if (!mounted) return;
     const fetchArticles = async () => {
       try {
         const response = await api.get("/articles", {
@@ -45,21 +62,28 @@ function HomeContent() {
       }
     };
     fetchArticles();
-  }, [currentCategory, currentPage, currentTitle]);
+  }, [currentCategory, currentPage, currentTitle, mounted]);
 
   const updateSeacrchParams = (key: string, value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
+    if (typeof window === "undefined") return;
+    const urlParams = new URLSearchParams(window.location.search);
     if (value) {
-      params.set(key, value);
+      urlParams.set(key, value);
     } else {
-      params.delete(key);
+      urlParams.delete(key);
     }
 
     if (key !== "page") {
-      params.set("page", "1");
+      urlParams.set("page", "1");
     }
 
-    router.push(`?${params.toString()}`);
+    router.push(`?${urlParams.toString()}`);
+
+    setSearchParams({
+      page: urlParams.get("page") || "1",
+      category: urlParams.get("category") || "",
+      title: urlParams.get("title") || "",
+    });
   };
 
   const handleSearch = (searchTerm: string) => {
@@ -69,6 +93,15 @@ function HomeContent() {
   const handlePageChange = (page: string) => {
     updateSeacrchParams("page", page.toString());
   };
+  if (!mounted) {
+    return (
+      <div className="sm:px-[60px] px-[20px] w-full flex items-center justify-center sm:mt-[42.5px]">
+        <div className="w-full max-w-[730px] sm:h-[276px] h-[380px] flex-col flex gap-[40px] items-center mt-[117px] sm:mt-0">
+          <div className="text-white text-center">Loading...</div>
+        </div>
+      </div>
+    );
+  }
   return (
     <>
       <div className="sm:px-[60px] px-[20px] w-full flex items-center justify-center sm:mt-[42.5px] ">
