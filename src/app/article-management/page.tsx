@@ -3,49 +3,58 @@ import { CategoryDropdown } from "@/components/category-dropdown";
 import { Navbar } from "@/components/ui/navbar/main-navbar";
 import * as React from "react";
 import { Category } from "../_components/searchbar";
-import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/utils/axios";
 import { Search } from "lucide-react";
 
 export default function Main() {
   const [categories, setCategories] = React.useState<Category[]>([]);
-  const searchParams = useSearchParams();
-  const defaultValue = searchParams.get("title") || "";
-  const [searchInput, setSearchInput] = React.useState(defaultValue);
+  const [mounted, setMounted] = React.useState(false);
+  const [searchParams, setSearchParams] = React.useState({
+    title: "",
+    category: "",
+    page: "",
+  });
+  const [searchInput, setSearchInput] = React.useState("");
 
-  const router = useRouter();
-  const currentCategory = searchParams.get("category") || "";
-
-  const updateSeacrchParams = (key: string, value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (value) {
-      params.set(key, value);
-    } else {
-      params.delete(key);
+  React.useEffect(() => {
+    setMounted(true);
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const params = {
+        title: urlParams.get("title") || "",
+        category: urlParams.get("category") || "",
+        page: urlParams.get("page") || "1",
+      };
+      setSearchParams(params);
+      setSearchInput(params.title);
     }
-
-    if (key !== "page") {
-      params.set("page", "1");
-    }
-
-    router.push(`?${params.toString()}`);
-  };
-
-  const onSearch = React.useCallback((searchTerm: string) => {
-    updateSeacrchParams("title", searchTerm);
   }, []);
 
   const updateSearchParams = (key: string, value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
+    if (typeof window === "undefined") return;
+    const urlParams = new URLSearchParams(window.location.search);
     if (value) {
-      params.set(key, value);
+      urlParams.set(key, value);
     } else {
-      params.delete(key);
+      urlParams.delete(key);
     }
 
-    params.set("page", "1");
-    router.push(`/?${params.toString()}`);
+    if (key !== "page") {
+      urlParams.set("page", "1");
+    }
+    const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+    window.history.pushState({}, "", newUrl);
+
+    setSearchParams({
+      title: urlParams.get("title") || "",
+      category: urlParams.get("category") || "",
+      page: urlParams.get("page") || "1",
+    });
   };
+
+  const onSearch = React.useCallback((searchTerm: string) => {
+    updateSearchParams("title", searchTerm);
+  }, []);
 
   const handleCategoryChange = (category: string) => {
     updateSearchParams("category", category);
@@ -67,19 +76,16 @@ export default function Main() {
   };
 
   React.useEffect(() => {
+    if (!mounted) return;
     const timer = setTimeout(() => {
-      if (searchInput !== defaultValue) {
+      if (searchInput !== searchParams.title) {
         if (searchInput !== undefined) {
           onSearch(searchInput);
         }
       }
     }, 500);
     return () => clearTimeout(timer);
-  }, [defaultValue, onSearch, searchInput]);
-
-  React.useEffect(() => {
-    setSearchInput(defaultValue);
-  }, [defaultValue]);
+  }, [mounted, onSearch, searchInput, searchParams.title]);
 
   React.useEffect(() => {
     const fetchCategories = async () => {
@@ -94,6 +100,10 @@ export default function Main() {
     };
     fetchCategories();
   }, []);
+
+  if (!mounted) {
+    return <div>Loading...</div>;
+  }
   return (
     <div>
       {" "}
