@@ -6,7 +6,7 @@ export default function Homepage() {
   return (
     <div>
       <Suspense fallback={<div>Loading pencarian...</div>}>
-        <Home />
+        <Home></Home>
       </Suspense>
     </div>
   );
