@@ -123,7 +123,7 @@ export default function Main() {
               <div className="">
                 <CategoryDropdown
                   className=""
-                  currentCategory={currentCategory}
+                  currentCategory={searchParams.category}
                   handleCategoryChange={handleCategoryChange}
                   categories={categories}
                 />
