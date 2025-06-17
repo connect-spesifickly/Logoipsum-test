@@ -5,7 +5,8 @@ import * as React from "react";
 import { Category } from "../_components/searchbar";
 import { api } from "@/utils/axios";
 import { Search } from "lucide-react";
-
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 export default function Main() {
   const [categories, setCategories] = React.useState<Category[]>([]);
   const [mounted, setMounted] = React.useState(false);
@@ -119,19 +120,19 @@ export default function Main() {
             </p>
           </div>
           <div className="flex items-center border-b-[1px]  p-[24px] gap-[10px] bg-gray-50 border-slate-200 h-[88px]">
-            <p className="flex text-[16px] font-medium text-slate-800">
-              <div className="">
+            <div className="flex text-[16px] font-medium gap-[6px] text-slate-800 justify-between w-full">
+              <div className="flex gap-[6px]">
                 <CategoryDropdown
-                  className=""
+                  className="!w-[109px] !h-[36px] !border-slate-200 !border-[1px]"
                   currentCategory={searchParams.category}
                   handleCategoryChange={handleCategoryChange}
                   categories={categories}
                 />
-                <div className=" w-full  rounded-[6px] ">
+                <div className=" w-full rounded-[6px] h-[36px] ">
                   <div
-                    className={`relative  border-primary-gray rounded-[6px] border-slate-200`}
+                    className={`relative max-w-[240px] w-full border-[1px]  rounded-[6px] border-slate-300`}
                   >
-                    <div className="bg-white rounded-[6px] px-[12px] py-[8px] flex h-[40px] gap-[6px] items-center justify-center">
+                    <div className="bg-white rounded-[6px] px-[12px] py-[8px] flex  gap-[6px] items-center justify-center">
                       <Search size={20} className={`text-slate-400 w-fit  `} />
                       <input
                         type="text"
@@ -148,9 +149,15 @@ export default function Main() {
                   </div>
                 </div>
               </div>
-              <div className=""></div>
-            </p>
+              <div className="">
+                <Button className="text-slate-50  h-[39px] font-medium text-[14px] py-2 px-4 sm:h-10 rounded-md">
+                  <Plus className="w-[10px] h-[10px]" />{" "}
+                  <div className="sm:block hidden">Add Articles</div>
+                </Button>
+              </div>
+            </div>
           </div>
+          <div className="bg-gray-200 h-2"></div>
         </div>
       </div>
     </div>
